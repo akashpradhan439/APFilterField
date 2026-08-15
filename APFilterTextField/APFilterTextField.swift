@@ -87,6 +87,7 @@ open class APFilterField: UITextField {
     let floatingFilterView = FloatingFilterView()
     nonisolated(unsafe) private var keyboardObservers: [NSObjectProtocol] = []
     nonisolated(unsafe) private var textDidChangeObserver: NSObjectProtocol?
+    nonisolated(unsafe) private var orientationObserver: NSObjectProtocol?
     private var currentPlacement: FilterPlacement = .below
     
     private static let filterGap: CGFloat = 4
@@ -109,6 +110,9 @@ open class APFilterField: UITextField {
         if let observer = textDidChangeObserver {
             NotificationCenter.default.removeObserver(observer)
         }
+        if let observer = orientationObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
     }
     
     // MARK: - Setup
@@ -128,6 +132,7 @@ open class APFilterField: UITextField {
         floatingFilterView.delegate = self
         setupKeyboardObservers()
         setupTextDidChangeObserver()
+        setupOrientationObserver()
     }
     
     private func setupTextDidChangeObserver() {
@@ -151,6 +156,24 @@ open class APFilterField: UITextField {
             self.filterDelegate?.filterField(self, didChangeText: currentText)
         }
     }
+
+    private func setupOrientationObserver() {
+        orientationObserver = NotificationCenter.default.addObserver(
+            forName: {
+#if swift(>=4.2)
+                return UIDevice.orientationDidChangeNotification
+#else
+                return NSNotification.Name.UIDeviceOrientationDidChange
+#endif
+            }(),
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            guard let self = self, self.isFirstResponder else { return }
+            self.resignFirstResponder()
+        }
+    }
+
     
     private func setupKeyboardObservers() {
 #if swift(>=4.2)
@@ -269,8 +292,7 @@ open class APFilterField: UITextField {
     private func showFilterView() {
         guard let vc = findViewController(), vc.view != nil else { return }
         
-        floatingFilterView.configure(options: options)
-        floatingFilterView.filter(with: text ?? "")
+        reloadOptions()
         
         if !floatingFilterView.isOpen {
             floatingFilterView.show(above: self, placement: currentPlacement)
@@ -287,6 +309,11 @@ open class APFilterField: UITextField {
         if floatingFilterView.isOpen {
             floatingFilterView.reposition(placement: currentPlacement)
         }
+    }
+
+    public func reloadOptions() {
+        floatingFilterView.configure(options: options)
+        floatingFilterView.filter(with: text ?? "")
     }
     
     // MARK: - Helpers

@@ -103,8 +103,8 @@ final class FloatingFilterView: UIView, UIGestureRecognizerDelegate {
     }()
     
     internal var effectiveMaxHeight: CGFloat {
-        let isLandscape: Bool = traitCollection.verticalSizeClass == .compact && traitCollection.horizontalSizeClass == .compact
-        
+        let traits = anchorView?.window?.traitCollection ?? traitCollection
+        let isLandscape: Bool = traits.verticalSizeClass == .compact && traits.horizontalSizeClass == .compact
         let count = isLandscape ? numberOfCellsToShowInLandscape : numberOfCellsToShow
         return count * rowHeight
     }
