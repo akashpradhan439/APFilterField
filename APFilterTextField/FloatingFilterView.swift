@@ -208,8 +208,10 @@ final class FloatingFilterView: UIView, UIGestureRecognizerDelegate {
         containerView?.layoutIfNeeded()
         
         tableView.alpha = 0
+        arrowView.alpha = 0
         UIView.animate(withDuration: 0.2, animations: {
             self.tableView.alpha = 1
+            self.arrowView.alpha = 1
         }, completion: { [weak self] _ in
             guard let strongSelf = self else { return }
             strongSelf.delegate?.floatingFilterDidShow(strongSelf)
@@ -223,6 +225,7 @@ final class FloatingFilterView: UIView, UIGestureRecognizerDelegate {
         let containerSnapshot = containerView
         UIView.animate(withDuration: 0.15, animations: {
             self.tableView.alpha = 0
+            self.arrowView.alpha = 0
         }, completion: { [weak self] _ in
             guard let strongSelf = self, strongSelf.containerView === containerSnapshot else { return }
             strongSelf.teardownContainer()

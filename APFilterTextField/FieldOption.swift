@@ -14,3 +14,9 @@ public struct FieldOption {
         self.value = value
     }
 }
+
+extension FieldOption: Equatable {
+    public static func == (lhs: FieldOption, rhs: FieldOption) -> Bool {
+        return lhs.id == rhs.id
+    }
+}
